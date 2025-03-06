@@ -21,7 +21,7 @@ const app = express();
 const PORT = process.env.PORT || 3000; // HTTP
 const HTTPS_PORT = process.env.HTTPS_PORT || 3443; // HTTPS
 const adminRoutes = require('./routes/admin_routestemp');
-app.use('/admin', adminRoutes);
+app.use('/admin', admin_routestemp);
 console.log("🔍 DATABASE_URL:", process.env.DATABASE_URL);
 
 // Intentar conexión a PostgreSQL antes de iniciar el servidor
