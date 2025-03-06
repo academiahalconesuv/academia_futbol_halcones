@@ -3,9 +3,8 @@ const router = express.Router();
 const pool = require('../db');
 const bcrypt = require('bcryptjs');
 
-// Ruta temporal para crear el usuario admin
+// Ruta para crear usuario admin
 router.get('/crear-admin/:secret', async (req, res) => {
-  // Utiliza un secret para proteger esta ruta
   if (req.params.secret !== 'MI_SUPER_SECRETO') {
     return res.status(403).send('Acceso prohibido');
   }
