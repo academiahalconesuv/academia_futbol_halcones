@@ -24,7 +24,6 @@
     <h1 class="text-3xl font-bold mb-8 text-gray-700 text-center">Detalles del Alumno</h1>
     
     <form action="/admin/alumnos/<%= alumno.id %>/editar" method="POST" class="space-y-6">
-      <!-- Curso de Interés -->
       <div>
         <label for="curso_interes" class="block text-sm font-medium text-gray-700">Curso de Interés:</label>
         <input 
@@ -38,7 +37,6 @@
           title="Sólo se permite curso1 o curso2 en minúsculas">
       </div>
       
-      <!-- Categoría Horario -->
       <div>
         <label for="categoria_horario" class="block text-sm font-medium text-gray-700">Categoría Horario:</label>
         <input 
@@ -48,29 +46,25 @@
           value="<%= alumno.categoria_horario %>" 
           class="border border-gray-300 p-2 w-full rounded-md" 
           required
-          pattern="^(14-17|10-13|6-9|4-5)$"
-          title="Debe ser exactamente una de las siguientes opciones: 14-17, 10-13, 6-9, 4-5">
+          pattern="^(16-17|14-15|12-13|10-11|8-9|6-7|4-5)$"
+          title="Debe ser exactamente una de las siguientes opciones: 16-17, 14-15, 12-13, 10-11, 8-9, 6-7, 4-5">
       </div>
 
-      <!-- Nombre del Alumno -->
       <div>
         <label for="nombre_nino" class="block text-sm font-medium text-gray-700">Nombre del Alumno:</label>
         <input type="text" id="nombre_nino" name="nombre_nino" value="<%= alumno.nombre_nino %>" class="border border-gray-300 p-2 w-full rounded-md" required>
       </div>
 
-      <!-- Edad -->
       <div>
         <label for="edad" class="block text-sm font-medium text-gray-700">Edad:</label>
         <input type="number" id="edad" name="edad" value="<%= alumno.edad %>" class="border border-gray-300 p-2 w-full rounded-md" required>
       </div>
 
-      <!-- Fecha de Nacimiento -->
       <div>
         <label for="fecha_nacimiento" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento:</label>
         <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="<%= alumno.fecha_nacimiento.toISOString().split('T')[0] %>" class="border border-gray-300 p-2 w-full rounded-md" required>
       </div>
 
-      <!-- Sexo -->
       <div>
         <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo:</label>
         <select id="sexo" name="sexo" class="border border-gray-300 p-2 w-full rounded-md">
@@ -79,32 +73,28 @@
         </select>
       </div>
 
-      <!-- Talla Camiseta -->
-   <!-- Talla Camiseta -->
-<div>
-  <label for="talla_camiseta" class="block text-sm font-medium text-gray-700">Talla de Camiseta:</label>
-  <select 
-    id="talla_camiseta" 
-    name="talla_camiseta" 
-    class="border border-gray-300 p-2 w-full rounded-md">
-    
-    <option value="4" <%= alumno.talla_camiseta == "4" ? "selected" : "" %>>4</option>
-    <option value="6" <%= alumno.talla_camiseta == "6" ? "selected" : "" %>>6</option>
-    <option value="8" <%= alumno.talla_camiseta == "8" ? "selected" : "" %>>8</option>
-    <option value="10" <%= alumno.talla_camiseta == "10" ? "selected" : "" %>>10</option>
-    <option value="12" <%= alumno.talla_camiseta == "12" ? "selected" : "" %>>12</option>
-    <option value="14" <%= alumno.talla_camiseta == "14" ? "selected" : "" %>>14</option>
-    <option value="16" <%= alumno.talla_camiseta == "16" ? "selected" : "" %>>16</option>
-    <option value="XCH" <%= alumno.talla_camiseta == "XCH" ? "selected" : "" %>>XCH</option>
-    <option value="CH" <%= alumno.talla_camiseta == "CH" ? "selected" : "" %>>CH</option>
-    <option value="M" <%= alumno.talla_camiseta == "M" ? "selected" : "" %>>M</option>
-    <option value="G" <%= alumno.talla_camiseta == "G" ? "selected" : "" %>>G</option>
-    <option value="XG" <%= alumno.talla_camiseta == "XG" ? "selected" : "" %>>XG</option>
+    <div>
+      <label for="talla_camiseta" class="block text-sm font-medium text-gray-700">Talla de Camiseta:</label>
+      <select 
+        id="talla_camiseta" 
+        name="talla_camiseta" 
+        class="border border-gray-300 p-2 w-full rounded-md">
+        
+        <option value="4" <%= alumno.talla_camiseta == "4" ? "selected" : "" %>>4</option>
+        <option value="6" <%= alumno.talla_camiseta == "6" ? "selected" : "" %>>6</option>
+        <option value="8" <%= alumno.talla_camiseta == "8" ? "selected" : "" %>>8</option>
+        <option value="10" <%= alumno.talla_camiseta == "10" ? "selected" : "" %>>10</option>
+        <option value="12" <%= alumno.talla_camiseta == "12" ? "selected" : "" %>>12</option>
+        <option value="14" <%= alumno.talla_camiseta == "14" ? "selected" : "" %>>14</option>
+        <option value="16" <%= alumno.talla_camiseta == "16" ? "selected" : "" %>>16</option>
+        <option value="XCH" <%= alumno.talla_camiseta == "XCH" ? "selected" : "" %>>XCH</option>
+        <option value="CH" <%= alumno.talla_camiseta == "CH" ? "selected" : "" %>>CH</option>
+        <option value="M" <%= alumno.talla_camiseta == "M" ? "selected" : "" %>>M</option>
+        <option value="G" <%= alumno.talla_camiseta == "G" ? "selected" : "" %>>G</option>
+        <option value="XG" <%= alumno.talla_camiseta == "XG" ? "selected" : "" %>>XG</option>
+      </select>
+    </div>
 
-  </select>
-</div>
-
-      <!-- Estatura y Peso -->
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label for="estatura" class="block text-sm font-medium text-gray-700">Estatura (cm):</label>
@@ -116,13 +106,11 @@
         </div>
       </div>
 
-      <!-- Centro Educativo -->
       <div>
         <label for="centro_educativo" class="block text-sm font-medium text-gray-700">Centro Educativo:</label>
         <input type="text" id="centro_educativo" name="centro_educativo" value="<%= alumno.centro_educativo %>" class="border border-gray-300 p-2 w-full rounded-md">
       </div>
 
-      <!-- Seguro Médico -->
       <div>
         <label for="seguro_medico" class="block text-sm font-medium text-gray-700">¿Tiene Seguro Médico?</label>
         <select id="seguro_medico" name="seguro_medico" class="border border-gray-300 p-2 w-full rounded-md">
@@ -136,7 +124,6 @@
         <input type="text" id="nombre_seguro" name="nombre_seguro" value="<%= alumno.nombre_seguro %>" class="border border-gray-300 p-2 w-full rounded-md">
       </div>
 
-      <!-- Nombre del Tutor -->
       <div>
         <label for="nombre_tutor" class="block text-sm font-medium text-gray-700">Nombre del Tutor:</label>
         <input type="text" id="nombre_tutor" name="nombre_tutor" value="<%= alumno.nombre_tutor %>" class="border border-gray-300 p-2 w-full rounded-md">
@@ -153,13 +140,11 @@
         </div>
       </div>
 
-      <!-- Dirección -->
       <div>
         <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección:</label>
         <textarea id="direccion" name="direccion" rows="3" class="border border-gray-300 p-2 w-full rounded-md"><%= alumno.direccion %></textarea>
       </div>
 
-      <!-- Campos adicionales -->
       <h2 class="text-xl font-semibold mt-8 text-gray-700">Información Médica y Deportiva</h2>
 
       <div>
@@ -265,26 +250,65 @@
           required
         >
       </div>
-
-      <!-- Archivos para Descargar -->
-      <div class="mt-6">
-        <h2 class="text-lg font-semibold text-gray-700">Documentos:</h2>
-        <div class="flex space-x-4">
-            <a href="/admin/alumnos/<%= alumno.id %>/descargar-acta" class="custom-button py-2 px-4 rounded-md">Descargar Acta de Nacimiento</a>
-            <a href="/admin/alumnos/<%= alumno.id %>/descargar-certificado" class="custom-button py-2 px-4 rounded-md">Descargar Certificado Médico</a>
-            <!-- Nuevo botón para descargar detalles completos en PDF -->
-            <a href="/admin/detalles/alumnos/<%= alumno.id %>/descargar-detalles" class="custom-button py-2 px-4 rounded-md">
-              Descargar PDF
-            </a>
-        </div>
-      </div>
-
-      <!-- Botones de Acción -->
-      <div class="mt-6 flex justify-end space-x-4">
+      <div class="mt-6 flex justify-end space-x-4 border-t pt-6">
         <button type="button" onclick="window.history.back()" class="logout-button py-2 px-4 rounded-md">Cancelar</button>
         <button type="submit" class="custom-button py-2 px-4 rounded-md">Guardar Cambios</button>
       </div>
     </form>
+
+      <div class="mt-8 border-t pt-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4">Documentos del Alumno</h2>
+        
+        <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+        <label class="block text-sm font-medium text-gray-800 mb-2">Acta de Nacimiento</label>
+        <% if (alumno.acta_nacimiento) { %>
+          <div class="flex items-center space-x-4">
+            <a href="/admin/alumnos/<%= alumno.id %>/descargar-acta" class="custom-button py-2 px-4 rounded-md">Descargar</a>
+            <form action="/admin/alumnos/<%= alumno.id %>/eliminar-documento" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este documento? Se deberá subir uno nuevo.');">
+              <input type="hidden" name="tipoDocumento" value="acta">
+              <button type="submit" class="logout-button py-2 px-4 rounded-md">Eliminar Archivo</button>
+            </form>
+          </div>
+        <% } else { %>
+          <form action="/admin/alumnos/<%= alumno.id %>/subir-documento" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="tipoDocumento" value="acta">
+            <label class="block text-sm font-medium text-gray-500 mb-2">No hay archivo. Sube uno nuevo:</label>
+            <div class="flex items-center space-x-2">
+              <input type="file" name="documento" class="border border-gray-300 p-2 rounded-md w-full" accept=".pdf" required>
+              <button type="submit" class="custom-button py-2 px-4 rounded-md flex-shrink-0">Subir</button>
+            </div>
+          </form>
+        <% } %>
+      </div>
+
+      <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+        <label class="block text-sm font-medium text-gray-800 mb-2">Certificado Médico</label>
+        <% if (alumno.certificado_medico) { %>
+          <div class="flex items-center space-x-4">
+            <a href="/admin/alumnos/<%= alumno.id %>/descargar-certificado" class="custom-button py-2 px-4 rounded-md">Descargar</a>
+            <form action="/admin/alumnos/<%= alumno.id %>/eliminar-documento" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este documento? Se deberá subir uno nuevo.');">
+              <input type="hidden" name="tipoDocumento" value="certificado">
+              <button type="submit" class="logout-button py-2 px-4 rounded-md">Eliminar Archivo</button>
+            </form>
+          </div>
+        <% } else { %>
+          <form action="/admin/alumnos/<%= alumno.id %>/subir-documento" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="tipoDocumento" value="certificado">
+            <label class="block text-sm font-medium text-gray-500 mb-2">No hay archivo. Sube uno nuevo:</label>
+            <div class="flex items-center space-x-2">
+              <input type="file" name="documento" class="border border-gray-300 p-2 rounded-md w-full" accept=".pdf" required>
+              <button type="submit" class="custom-button py-2 px-4 rounded-md flex-shrink-0">Subir</button>
+            </div>
+          </form>
+        <% } %>
+      </div>
+
+      <div>
+         <a href="/admin/detalles/alumnos/<%= alumno.id %>/descargar-detalles" class="custom-button py-2 px-4 rounded-md">
+            Descargar PDF de Inscripción
+         </a>
+      </div>
+    </div>
   </main>
 
   <footer class="custom-bg text-white py-6 mt-auto w-full">
