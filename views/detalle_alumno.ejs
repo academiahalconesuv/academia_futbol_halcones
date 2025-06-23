@@ -106,49 +106,65 @@
           </div>
 
         <!-- Comprobante de pago -->
-        <div class="mt-6">
-          <h3 class="text-xl font-semibold text-gray-700">Comprobante de Pago</h3>
-          
-          <% if (comprobante) { %>
-            <p class="text-sm text-gray-500">Estado del Comprobante:</p>
-            <% if (comprobante.estado === 'pendiente') { %>
-              <span class="status-pending">En espera de validación</span>
-            <% } else if (comprobante.estado === 'validado') { %>
-              <span class="status-active">Inscripción activa</span>
-              <p class="text-sm text-gray-500 mt-2">Periodo: <%= comprobante.periodo %></p>
-              <p class="text-sm text-gray-500 mt-2">Vence: <%= comprobante.fecha_vencimiento ? new Date(comprobante.fecha_vencimiento).toLocaleDateString() : 'No definido' %></p>
-              <div class="countdown" id="countdown">Tiempo restante: 0 días</div>
-            <% } else if (comprobante.estado === 'rechazado') { %>
-              <span class="status-rejected">Comprobante rechazado</span>
-            <% } else if (comprobante.estado === 'vencido') { %>
-              <span class="status-expired">Comprobante vencido</span>
-            <% } %>
+        <div class="mt-6 border-t pt-4">
+    <h3 class="text-xl font-semibold text-gray-700">Comprobante de Inscripción</h3>
 
-            <!-- Botón de descarga corregido -->
-            <p class="text-sm text-gray-500 mt-2">Archivo:</p>
-            <a href="/comprobantes/<%= comprobante.id %>/descargar" class="text-blue-600 hover:underline">
-              Descargar Comprobante
-            </a>
+    <% if (comprobanteInscripcion) { %>
+        <p class="text-sm text-gray-500">Estado:</p>
+        <% if (comprobanteInscripcion.estado === 'pendiente') { %>
+            <span class="status-pending">En espera de validación</span>
+        <% } else if (comprobanteInscripcion.estado === 'aprobado') { %>
+            <span class="status-active">Inscripción Activa</span>
+            <p class="text-sm text-gray-500 mt-2">Vence: <%= new Date(comprobanteInscripcion.fecha_vencimiento).toLocaleDateString() %></p>
+        <% } else if (comprobanteInscripcion.estado === 'rechazado') { %>
+            <span class="status-rejected">Comprobante rechazado</span>
+        <% } else if (comprobanteInscripcion.estado === 'vencido') { %>
+            <span class="status-expired">Inscripción vencida</span>
+        <% } %>
+        <a href="/admin/comprobantes/<%= comprobanteInscripcion.id %>/descargar" class="text-blue-600 hover:underline block mt-2">Descargar Comprobante</a>
+    <% } else { %>
+        <p class="text-sm text-red-500">No se ha subido ningún comprobante de inscripción.</p>
+    <% } %>
 
-          <% } else { %>
-            <p class="text-sm text-red-500">No se ha subido ningún comprobante.</p>
-          <% } %>
+    <% if (!comprobanteInscripcion || ['rechazado', 'vencido'].includes(comprobanteInscripcion.estado)) { %>
+        <form action="/alumno/<%= alumno.id %>/comprobante" method="POST" enctype="multipart/form-data" class="mt-4">
+            <input type="hidden" name="tipo_comprobante" value="inscripcion">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Subir nuevo comprobante de Inscripción:</label>
+            <input type="file" name="comprobante" class="mb-4" required>
+            <button type="submit" class="custom-button text-white py-2 px-4 rounded-md">Subir</button>
+        </form>
+    <% } %>
+</div>
 
-          <!-- Formulario para subir un nuevo comprobante (SOLO IMÁGENES: JPG, JPEG, PNG) -->
-          <% if (!comprobante || comprobante.estado === 'rechazado' || comprobante.estado === 'vencido') { %>
-            <form action="/comprobantes/<%= alumno.id %>/subir" method="POST" enctype="multipart/form-data" class="mt-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Subir nuevo comprobante (solo imágenes JPG, JPEG, PNG):</label>
-              <input 
-                type="file" 
-                name="comprobante" 
-                accept=".jpg,.jpeg,.png  ARCHIVOS menores a 2 megas" 
-                class="mb-4" 
-                required>
-              <button type="submit" class="custom-button text-white py-2 px-4 rounded-md">Subir Comprobante</button>
-            </form>
-          <% } %>
-        </div>
-      </div>
+<div class="mt-6 border-t pt-4">
+    <h3 class="text-xl font-semibold text-gray-700">Comprobante de Mensualidad</h3>
+
+    <% if (comprobanteMensualidad) { %>
+        <p class="text-sm text-gray-500">Estado:</p>
+        <% if (comprobanteMensualidad.estado === 'pendiente') { %>
+            <span class="status-pending">En espera de validación</span>
+        <% } else if (comprobanteMensualidad.estado === 'aprobado') { %>
+            <span class="status-active">Mensualidad Activa</span>
+             <p class="text-sm text-gray-500 mt-2">Vence: <%= new Date(comprobanteMensualidad.fecha_vencimiento).toLocaleDateString() %></p>
+        <% } else if (comprobanteMensualidad.estado === 'rechazado') { %>
+            <span class="status-rejected">Comprobante rechazado</span>
+        <% } else if (comprobanteMensualidad.estado === 'vencido') { %>
+            <span class="status-expired">Mensualidad vencida</span>
+        <% } %>
+        <a href="/admin/comprobantes/<%= comprobanteMensualidad.id %>/descargar" class="text-blue-600 hover:underline block mt-2">Descargar Comprobante</a>
+    <% } else { %>
+        <p class="text-sm text-red-500">No se ha subido ningún comprobante de mensualidad.</p>
+    <% } %>
+
+    <% if (!comprobanteMensualidad || ['rechazado', 'vencido'].includes(comprobanteMensualidad.estado) || (comprobanteInscripcion && comprobanteInscripcion.estado === 'aprobado')) { %>
+        <form action="/alumno/<%= alumno.id %>/comprobante" method="POST" enctype="multipart/form-data" class="mt-4">
+            <input type="hidden" name="tipo_comprobante" value="mensualidad">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Subir nuevo comprobante de Mensualidad:</label>
+            <input type="file" name="comprobante" class="mb-4" required>
+            <button type="submit" class="custom-button text-white py-2 px-4 rounded-md">Subir</button>
+        </form>
+    <% } %>
+</div>
 
       <button onclick="window.location.href='/panel-principal/<%= userId %>'" class="custom-button text-white py-3 px-6 rounded-md font-semibold w-full mt-6">Volver al Panel Principal</button>
     </section>
