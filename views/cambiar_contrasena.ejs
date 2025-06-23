@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cambiar Contraseña - Academia Halcones UV</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <link rel="stylesheet" href="/assets/css/styles.css"> </head>
+<body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+
+  <header class="custom-bg text-white py-4 shadow-md">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <img src="/assets/img/logo.png" alt="Logo Academia Halcones UV" class="h-16 w-auto mr-4">
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-12 flex-grow flex items-center justify-center">
+    <div class="w-full max-w-md">
+      
+      <form action="/users/cambiar-contrasena" method="POST" class="bg-white p-8 rounded-2xl shadow-xl space-y-6">
+        <h2 class="text-2xl font-bold text-center text-gray-800">Cambiar Contraseña</h2>
+        
+        <% if (locals.error) { %>
+          <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+            <p class="font-bold">Error</p>
+            <p><%= error %></p>
+          </div>
+        <% } %>
+        <% if (locals.success) { %>
+           <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
+            <p class="font-bold">Éxito</p>
+            <p><%= success %></p>
+          </div>
+        <% } %>
+
+        <div>
+          <label for="contrasena_actual" class="block text-sm font-medium text-gray-700">Contraseña Actual</label>
+          <input type="password" id="contrasena_actual" name="contrasena_actual" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+
+        <div>
+          <label for="nueva_contrasena" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+          <input type="password" id="nueva_contrasena" name="nueva_contrasena" minlength="8" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+
+        <div>
+          <label for="confirmar_contrasena" class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
+          <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" minlength="8" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        
+        <div class="flex items-center justify-between pt-4">
+          <a href="/panel-principal/<%= userId %>" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+            ← Volver al panel
+          </a>
+          <button type="submit" class="custom-button text-white py-2 px-6 rounded-md font-semibold">
+            Actualizar Contraseña
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="custom-bg text-white py-6 mt-auto w-full">
+    <div class="container mx-auto px-4 text-center">
+      <p>&copy; 2024 Academia Halcones UV. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

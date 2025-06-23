@@ -34,15 +34,23 @@
 <header class="custom-bg text-white py-4 shadow-md">
     <div class="container mx-auto px-4 flex justify-between items-center">
       <img src="/assets/img/logo.png" alt="Logo Academia Halcones UV" class="h-16 w-auto mr-4">
-      <div>
+      
+      <div class="flex items-center gap-4">
         <button 
-        onclick="cerrarSesion()" 
-        class="logout-button logout-session text-white py-2 px-4 rounded-md font-semibold">
-        Cerrar Sesión
-      </button>
+          onclick="window.location.href='/users/cambiar-contrasena'"
+          class="custom-button text-white py-2 px-4 rounded-md font-semibold">
+          Cambiar Contraseña
+        </button>
+        
+        <button 
+          onclick="cerrarSesion()" 
+          class="logout-button logout-session text-white py-2 px-4 rounded-md font-semibold">
+          Cerrar Sesión
+        </button>
       </div>
+
     </div>
-  </header>
+</header>
   
 <body class="bg-gray-50 font-sans min-h-screen flex flex-col">
 
