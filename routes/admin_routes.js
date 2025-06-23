@@ -3,6 +3,21 @@ const bcrypt = require('bcrypt');
 const pool = require('../db'); // Conexión a la base de datos
 const router = express.Router();
 const fs = require('fs');
+const multer = require('multer'); 
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    // Aceptar solo archivos PDF
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      // Rechazar cualquier otro tipo de archivo
+      cb(new Error('Formato de archivo no válido. Solo se permiten archivos PDF.'), false);
+    }
+  }
+});
 // Middleware para verificar si el usuario es administrador
 function verificarAdmin(req, res, next) {
   if (req.session && req.session.isAdmin === true) {
@@ -292,6 +307,65 @@ router.get('/alumnos/:id/descargar-certificado', verificarAdmin, async (req, res
   } catch (error) {
     console.error('Error al descargar el certificado médico:', error);
     res.status(500).send('Error al descargar el certificado médico.');
+  }
+});
+
+router.post('/alumnos/:id/eliminar-documento', verificarAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tipoDocumento } = req.body; // Recibirá 'acta' o 'certificado'
+
+    let columnaDb;
+    if (tipoDocumento === 'acta') {
+      columnaDb = 'acta_nacimiento';
+    } else if (tipoDocumento === 'certificado') {
+      columnaDb = 'certificado_medico';
+    } else {
+      return res.status(400).send('Tipo de documento no válido.');
+    }
+
+    // Se construye la query de forma segura validando el nombre de la columna antes
+    const query = `UPDATE registro_alumno SET ${columnaDb} = NULL WHERE id = $1`;
+    await pool.query(query, [id]);
+
+    console.log(`Admin eliminó el documento '${tipoDocumento}' del alumno ${id}.`);
+    res.redirect('back'); // Recarga la página anterior para ver el cambio
+
+  } catch (error) {
+    console.error('Error al eliminar documento (admin):', error);
+    res.status(500).send('Error interno del servidor.');
+  }
+});
+
+// RUTA PARA SUBIR/REEMPLAZAR UN DOCUMENTO (ACTA O CERTIFICADO) POR PARTE DEL ADMIN
+router.post('/alumnos/:id/subir-documento', verificarAdmin, upload.single('documento'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tipoDocumento } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).send('No se ha subido ningún archivo.');
+    }
+
+    let columnaDb;
+    if (tipoDocumento === 'acta') {
+      columnaDb = 'acta_nacimiento';
+    } else if (tipoDocumento === 'certificado') {
+      columnaDb = 'certificado_medico';
+    } else {
+      return res.status(400).send('Tipo de documento no válido.');
+    }
+
+    const query = `UPDATE registro_alumno SET ${columnaDb} = $1 WHERE id = $2`;
+    await pool.query(query, [file.buffer, id]);
+
+    console.log(`Admin subió el documento '${tipoDocumento}' del alumno ${id}.`);
+    res.redirect('back'); // Recarga la página para ver el cambio
+
+  } catch (error) {
+    console.error('Error al subir documento (admin):', error);
+    res.status(500).send('Error interno del servidor.');
   }
 });
 

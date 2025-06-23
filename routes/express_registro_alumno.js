@@ -2,67 +2,60 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const pool = require('../db');
-const path = require('path');
-const fs = require('fs');
+// No usamos fs ni path para comprobantes, solo BD
 
-router.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
-  setHeaders: (res, filePath) => {
-    res.setHeader('Content-Disposition', `attachment; filename="${path.basename(filePath)}"`);
-  }
-}));
-
-// Configuración de multer para el manejo de archivos
+// Configuración de multer en memoria
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Solo se permiten archivos PDF, JPG, PNG o DOCX.'));
+  }
+});
 
-
-
-// Funciones auxiliares para normalizar datos
-const capitalizeWords = (text) =>
+// Helpers de normalización
+const capitalizeWords = text =>
   text
     ? text
         .toLowerCase()
         .split(' ')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ')
     : null;
-
-const capitalizeFirstLetter = (text) =>
+const capitalizeFirstLetter = text =>
   text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : null;
 
-// Ruta para renderizar el formulario de registro de alumnos (GET)
+// GET: Formulario de registro de alumno
 router.get('/registro-alumno', (req, res) => {
-  if (!req.session || !req.session.userId) {
-    return res.redirect('/users/login');
-  }
-  res.render('registro_alumno', {
-    userId: req.session.userId,
-  });
+  if (!req.session || !req.session.userId) return res.redirect('/users/login');
+  res.render('registro_alumno', { userId: req.session.userId });
 });
 
-// Ruta para el panel de administración
+// GET: Panel de administración
 router.get('/admin-panel/:id', async (req, res) => {
-  const { id } = req.params;
-
-  if (!req.session.isAdmin) {
-    return res.status(403).send('Acceso no autorizado.');
-  }
-
+  if (!req.session.isAdmin) return res.status(403).send('Acceso no autorizado.');
   try {
-    const users = await pool.query('SELECT user_id, email FROM users WHERE is_admin = FALSE');
-    const alumnos = await pool.query('SELECT * FROM registro_alumno');
-
+    const usersRes = await pool.query('SELECT user_id, email FROM users WHERE is_admin = FALSE');
+    const alumnosRes = await pool.query('SELECT * FROM registro_alumno');
     res.render('admin_panel', {
-      adminId: id,
-      users: users.rows,
-      alumnos: alumnos.rows,
+      adminId: req.params.id,
+      users: usersRes.rows,
+      alumnos: alumnosRes.rows
     });
   } catch (error) {
-    console.error('Error al cargar el panel de administración:', error);
+    console.error('Error al cargar admin_panel:', error);
     res.status(500).send('Error interno del servidor.');
   }
 });
 
+// POST: Registrar alumno
 // Ruta para registrar un alumno (POST)
 router.post(
   '/registro-alumno',
@@ -217,97 +210,90 @@ router.post(
   }
 );
 
-// Ruta para subir comprobante de pago
-router.post('/alumno/:id/comprobante', upload.single('comprobante'), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const comprobante = req.file;
-
-    if (!comprobante) {
-      return res.status(400).send('Debe subir un comprobante.');
+// POST: Subir comprobante (mensualidad o inscripción)
+router.post(
+  '/alumno/:id/comprobante',
+  upload.single('comprobante'),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tipo = req.body.tipo_comprobante;
+      const file = req.file;
+      if (!file) return res.status(400).send('Debe subir un comprobante.');
+      await pool.query(
+        `INSERT INTO comprobantes_pago (
+           alumno_id,
+           nombre_archivo,
+           estado,
+           tipo_comprobante,
+           fecha_subida,
+           archivo_data
+         ) VALUES ($1,$2,'pendiente',$3,NOW(),$4)`,
+        [id, file.originalname, tipo, file.buffer]
+      );
+      res.redirect(`/alumno/${id}`);
+    } catch (err) {
+      console.error('Error al subir comprobante:', err);
+      res.status(500).send('Error interno al subir comprobante.');
     }
-
-    const comprobanteNombre = `${Date.now()}-${comprobante.originalname}`;
-    const comprobantePath = path.join(__dirname, '../uploads', comprobanteNombre);
-
-    fs.writeFileSync(comprobantePath, comprobante.buffer);
-
-    await pool.query(
-      'UPDATE registro_alumno SET comprobante_pago = $1, estado_comprobante = $2 WHERE id = $3',
-      [comprobanteNombre, 'pendiente', id]
-    );
-
-    res.redirect(`/alumno/${id}`);
-  } catch (error) {
-    console.error('Error al subir el comprobante:', error);
-    res.status(500).send('Error interno del servidor.');
   }
-});
+);
 
-// Ruta para eliminar un alumno (DELETE)
+// GET: Descargar comprobante (usuario)
+router.get(
+  '/alumno/:id/comprobante/:cid/descargar',
+  async (req, res) => {
+    try {
+      const { cid } = req.params;
+      const result = await pool.query(
+        'SELECT nombre_archivo, archivo_data FROM comprobantes_pago WHERE id=$1',
+        [cid]
+      );
+      if (result.rowCount === 0) return res.status(404).send('Comprobante no encontrado.');
+      const { nombre_archivo, archivo_data } = result.rows[0];
+      res.setHeader('Content-Disposition', `attachment; filename="${nombre_archivo}"`);
+      res.send(archivo_data);
+    } catch (err) {
+      console.error('Error al descargar comprobante:', err);
+      res.status(500).send('Error interno al descargar comprobante.');
+    }
+  }
+);
+
+// DELETE: Eliminar alumno
 router.delete('/alumno/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ message: 'Usuario no autenticado' });
-    }
-
-    const result = await pool.query('DELETE FROM registro_alumno WHERE id = $1 RETURNING *', [id]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Alumno no encontrado' });
-    }
-
-    res.status(200).json({ message: 'Alumno eliminado exitosamente' });
-  } catch (error) {
-    console.error('Error al eliminar el alumno:', error);
-    res.status(500).json({ message: 'Error al eliminar el alumno. Inténtelo de nuevo más tarde.' });
-  }
-});
-// Ruta para obtener detalles del alumno (GET)
-// Modificar esta ruta para asegurarse de que la matrícula esté disponible
-router.get('/alumno/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!req.session || !req.session.userId) {
-      return res.redirect('/users/login');
-    }
-
-    const alumnoResult = await pool.query('SELECT * FROM registro_alumno WHERE id = $1', [id]);
-    if (alumnoResult.rows.length === 0) {
-      return res.status(404).send('Alumno no encontrado.');
-    }
-    const alumno = alumnoResult.rows[0];
-
-    const comprobanteResult = await pool.query(
-      `SELECT *, (DATE_PART('day', fecha_vencimiento::timestamp - NOW()::timestamp)) AS dias_restantes
-       FROM comprobantes_pago
-       WHERE alumno_id = $1
-       ORDER BY fecha_subida DESC
-       LIMIT 1`,
-      [id]
-    );
-    const comprobante = comprobanteResult.rows.length > 0 ? comprobanteResult.rows[0] : null;
-
-    
-    // Mapear estado "aprobado" como "validado" para consistencia
-    if (comprobante && comprobante.estado === 'aprobado') {
-      comprobante.estado = 'validado';
-    }
-
-    res.render('detalle_alumno', {
-      alumno,
-      comprobante,
-      userId: req.session.userId,
-    });
-  } catch (error) {
-    console.error('Error al obtener detalles del alumno:', error.message);
-    res.status(500).send('Error interno del servidor.');
+    if (!req.session || !req.session.userId) return res.status(401).json({ message: 'Usuario no autenticado' });
+    const delRes = await pool.query('DELETE FROM registro_alumno WHERE id=$1 RETURNING *',[id]);
+    if (delRes.rowCount === 0) return res.status(404).json({ message: 'Alumno no encontrado' });
+    res.json({ message: 'Alumno eliminado exitosamente' });
+  } catch (err) {
+    console.error('Error al eliminar alumno:', err);
+    res.status(500).json({ message: 'Error interno al eliminar alumno.' });
   }
 });
 
-
+// GET: Detalle de alumno incluyendo comprobantes
+router.get(
+  '/alumno/:id',
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!req.session || !req.session.userId) return res.redirect('/users/login');
+      const alumRes = await pool.query('SELECT * FROM registro_alumno WHERE id=$1',[id]);
+      if (alumRes.rowCount === 0) return res.status(404).send('Alumno no encontrado.');
+      const alumno = alumRes.rows[0];
+      const compRes = await pool.query(`SELECT *, DATE_PART('day', fecha_vencimiento::timestamp - NOW()::timestamp) AS dias_restantes FROM comprobantes_pago WHERE alumno_id=$1 ORDER BY fecha_subida DESC`,[id]);
+      const filas = compRes.rows;
+      const comprobanteMensualidad = filas.find(c => c.tipo_comprobante==='mensualidad')||null;
+      const comprobanteInscripcion = filas.find(c => c.tipo_comprobante==='inscripcion')||null;
+      res.render('detalle_alumno', { alumno, comprobanteMensualidad, comprobanteInscripcion, userId: req.session.userId });
+    } catch (err) {
+      console.error('Error al obtener detalles del alumno:', err);
+      res.status(500).send('Error interno al obtener detalles del alumno.');
+    }
+  }
+);
 
 module.exports = router;
