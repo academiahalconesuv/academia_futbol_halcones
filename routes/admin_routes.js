@@ -143,18 +143,29 @@ router.get('/panel', verificarAdmin, (req, res) => {
 router.get('/alumnos/:id', verificarAdmin, async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query('SELECT * FROM registro_alumno WHERE id = $1', [id]);
-    if (result.rows.length === 0) {
+    // Hacemos ambas consultas a la base de datos al mismo tiempo
+    const [alumnoResult, categoriasResult] = await Promise.all([
+      pool.query('SELECT * FROM registro_alumno WHERE id = $1', [id]),
+      pool.query('SELECT nombre FROM categorias WHERE is_activa = TRUE ORDER BY nombre ASC')
+    ]);
+
+    if (alumnoResult.rows.length === 0) {
       return res.status(404).send('Alumno no encontrado.');
     }
-    const userId = req.session.userId; // Obtener userId de la sesión
-    res.render('admin_detalle_alumno', { alumno: result.rows[0], userId }); // Renderizar admin_detalle_alumno.ejs
+    
+    const userId = req.session.userId;
+    // Pasamos tanto los datos del alumno como la lista de categorías a la vista
+    res.render('admin_detalle_alumno', { 
+      alumno: alumnoResult.rows[0], 
+      categorias: categoriasResult.rows,
+      userId 
+    });
+
   } catch (error) {
     console.error('Error al obtener los detalles del alumno:', error);
     res.status(500).send('Error al obtener los detalles del alumno.');
   }
 });
-
 // Ruta para editar los detalles de un alumno
 router.post('/alumnos/:id/editar', verificarAdmin, async (req, res) => {
   const { id } = req.params;

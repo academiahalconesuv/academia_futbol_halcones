@@ -33,9 +33,25 @@ const capitalizeFirstLetter = text =>
   text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : null;
 
 // GET: Formulario de registro de alumno
-router.get('/registro-alumno', (req, res) => {
-  if (!req.session || !req.session.userId) return res.redirect('/users/login');
-  res.render('registro_alumno', { userId: req.session.userId });
+router.get('/registro-alumno', async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/users/login');
+  }
+  try {
+    // Obtenemos solo las categorías activas de la base de datos
+    const categoriasResult = await pool.query(
+      "SELECT nombre, horario FROM categorias WHERE is_activa = TRUE ORDER BY nombre ASC"
+    );
+
+    // Enviamos el userId y la lista de categorías a la plantilla EJS
+    res.render('registro_alumno', {
+      userId: req.session.userId,
+      categorias: categoriasResult.rows
+    });
+  } catch (error) {
+    console.error('Error al obtener categorías para el formulario:', error);
+    res.status(500).send('Error al cargar la página de registro.');
+  }
 });
 
 // GET: Panel de administración

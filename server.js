@@ -162,17 +162,22 @@ cron.schedule('1 0 * * *', async () => {
 // ─────────────────────────────────────────────────────────
 //   CRON: Eliminar comprobantes del mes anterior después de 5 días
 // ─────────────────────────────────────────────────────────
-cron.schedule('5 0 6 * *', async () => { 
+cron.schedule('5 0 * * *', async () => { // Se ejecuta todos los días a las 12:05 AM
   try {
-    console.log('🗑 Eliminando comprobantes vencidos del mes anterior...');
-
+    console.log('🗑️ Buscando comprobantes de mensualidad antiguos para eliminar...');
     const result = await pool.query(`
       DELETE FROM comprobantes_pago
-      WHERE estado = 'vencido' AND fecha_subida < date_trunc('month', CURRENT_DATE)
+      WHERE estado = 'vencido'
+        AND tipo_comprobante = 'mensualidad'
+        AND fecha_vencimiento < NOW() - INTERVAL '1 month'
     `);
 
-    console.log(`✅ Eliminados ${result.rowCount} comprobantes vencidos.`);
+    if (result.rowCount > 0) {
+      console.log(`✅ Se eliminaron ${result.rowCount} comprobantes de mensualidad antiguos.`);
+    } else {
+      console.log('No hay comprobantes de mensualidad antiguos para eliminar.');
+    }
   } catch (error) {
-    console.error('❌ Error al eliminar comprobantes vencidos:', error);
+    console.error('❌ Error al eliminar comprobantes antiguos:', error);
   }
 });

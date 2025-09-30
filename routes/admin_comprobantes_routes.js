@@ -97,10 +97,10 @@ router.post('/:id/aprobar', async (req, res) => {
         break;
       // --- NUEVO CASO AÑADIDO ---
       case 'anual':
-        // Establece la fecha de vencimiento para exactamente un año después
-        ahora.setFullYear(ahora.getFullYear() + 1);
-        fechaVencimiento = ahora;
-        break;
+  const anioActual = ahora.getFullYear();
+  // Establece la fecha de vencimiento para el 31 de diciembre del año actual
+  fechaVencimiento = new Date(anioActual, 11, 31); // El mes 11 es Diciembre (porque se cuenta de 0 a 11)
+  break;
       default:
         // Mensaje de error actualizado para incluir la nueva opción
         return res.status(400).send('Periodo inválido. Usa un_minuto, mensual, bimestral o anual.');
@@ -123,15 +123,15 @@ router.post('/:id/aprobar', async (req, res) => {
       [alumnoId, id]
     );
 
-    await pool.query(
+     await pool.query(
       `UPDATE comprobantes_pago
-         SET estado = 'aprobado',
-             periodo = $1,
-             fecha_vencimiento = $2
-       WHERE id = $3`,
-      [periodo, fechaVencimiento, id]
-    );
-
+        SET estado = 'aprobado',
+          periodo = $1,
+          fecha_vencimiento = $2,
+         fecha_aprobacion = NOW()
+         WHERE id = $3`,
+[periodo, fechaVencimiento, id]
+);
     res.redirect('/admin/comprobantes');
   } catch (err) {
     console.error('Error al aprobar comprobante:', err);

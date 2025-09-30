@@ -19,37 +19,32 @@
       </div>
     </div>
   </header>
-
-  <main class="container mx-auto px-4 py-12 flex-grow">
-    <h1 class="text-3xl font-bold mb-8 text-gray-700 text-center">Detalles del Alumno</h1>
-    
-    <form action="/admin/alumnos/<%= alumno.id %>/editar" method="POST" class="space-y-6">
+      <main class="container mx-auto px-4 py-12 flex-grow">
+      <h1 class="text-3xl font-bold mb-8 text-gray-700 text-center">Detalles del Alumno</h1>
+      <form action="/admin/alumnos/<%= alumno.id %>/editar" method="POST" class="space-y-6">
       <div>
-        <label for="curso_interes" class="block text-sm font-medium text-gray-700">Curso de Interés:</label>
-        <input 
-          type="text" 
-          id="curso_interes" 
-          name="curso_interes" 
-          value="<%= alumno.curso_interes %>" 
-          class="border border-gray-300 p-2 w-full rounded-md" 
-          required
-          pattern="^(curso1|curso2)$"
-          title="Sólo se permite curso1 o curso2 en minúsculas">
-      </div>
+    <label for="curso_interes" class="block text-sm font-medium text-gray-700">Curso de Interés:</label>
+    <select id="curso_interes" name="curso_interes" class="border border-gray-300 p-2 w-full rounded-md" required>
+          <option value="curso1" <%= alumno.curso_interes === 'curso1' ? 'selected' : '' %>>Curso 1 (Lunes, Miercoles y Viernes)</option>
+          <option value="curso2" <%= alumno.curso_interes === 'curso2' ? 'selected' : '' %>>Curso 2 (Martes y Jueves)</option>
+        </select>
+ </div>
       
-      <div>
-        <label for="categoria_horario" class="block text-sm font-medium text-gray-700">Categoría Horario:</label>
-        <input 
-          type="text" 
-          id="categoria_horario" 
-          name="categoria_horario" 
-          value="<%= alumno.categoria_horario %>" 
-          class="border border-gray-300 p-2 w-full rounded-md" 
-          required
-          pattern="^(16-17|14-15|12-13|10-11|8-9|6-7|4-5)$"
-          title="Debe ser exactamente una de las siguientes opciones: 16-17, 14-15, 12-13, 10-11, 8-9, 6-7, 4-5">
+       <div>
+      <label for="categoria_horario" class="block text-sm font-medium text-gray-700">Categoría Horario:</label>
+      <select id="categoria_horario" name="categoria_horario" class="border border-gray-300 p-2 w-full rounded-md" required>
+          <option value="" disabled>Selecciona una categoría</option>
+          <% if (categorias && categorias.length > 0) { %>
+            <% categorias.forEach(categoria => { %>
+              <option 
+                value="<%= categoria.nombre %>"
+                <%= (alumno.categoria_horario === categoria.nombre) ? 'selected' : '' %>>
+                Categoría <%= categoria.nombre %>
+              </option>
+            <% }); %>
+          <% } %>
+        </select>
       </div>
-
       <div>
         <label for="nombre_nino" class="block text-sm font-medium text-gray-700">Nombre del Alumno:</label>
         <input type="text" id="nombre_nino" name="nombre_nino" value="<%= alumno.nombre_nino %>" class="border border-gray-300 p-2 w-full rounded-md" required>
@@ -313,7 +308,7 @@
 
   <footer class="custom-bg text-white py-6 mt-auto w-full">
     <div class="container mx-auto px-4 text-center">
-      <p>Academia Halcones UV - Todos los derechos reservados 2024</p>
+      <p>Academia Halcones UV - Todos los derechos reservados 2025</p>
     </div>
   </footer>
 </body>
