@@ -16,6 +16,8 @@ const comprobantesRoutes = require('./routes/comprobantes');
 const adminRoutes = require('./routes/admin_routes');
 const adminComprobantesRoutes = require('./routes/admin_comprobantes_routes');
 const reportesRoutes = require('./routes/reportes_routes');
+const matriculaRoutes = require('./routes/matricula_routes');
+const categoriaRoutes = require('./routes/categoria_routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000; // HTTP
@@ -85,6 +87,8 @@ app.use('/admin/detalles', detallesPdfRoutes);
 app.use('/admin/comprobantes', adminComprobantesRoutes);
 app.use('/admin/reportes', verificarAdmin, reportesRoutes);
 app.use('/admin', adminRoutes);
+app.use('/admin/matriculas', matriculaRoutes);
+app.use('/admin/categorias', categoriaRoutes);
 
 // Ruta de inicio
 app.get('/', (req, res) => {
